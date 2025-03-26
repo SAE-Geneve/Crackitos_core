@@ -1,4 +1,8 @@
 {
     "name": "crackitos-core",
-    "version-string": "1.0"
+    "version-string": "1.0",
+    "features":
+    {
+        "tests": {"description": "Enable GTests", "dependencies": ["gtest"]}
+    }
 }
