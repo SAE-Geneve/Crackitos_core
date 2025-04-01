@@ -30,8 +30,8 @@ namespace crackitos_core::math
         constexpr AABB(const Vec2f min_bound, const Vec2f max_bound) : min_bound_(min_bound), max_bound_(max_bound)
         {
             centre_ = (min_bound + max_bound) * 0.5f;
-            half_size_vec_ = max_bound - centre_;
-            half_size_length_ = (max_bound - centre_).Magnitude();
+            half_size_vec_ = (max_bound_ - min_bound_) * 0.5f;
+            half_size_length_ = half_size_vec_.Magnitude();
         }
 
         constexpr AABB(const Vec2f min_bound,
@@ -50,9 +50,9 @@ namespace crackitos_core::math
         constexpr AABB(const Vec2f centre, const Vec2f half_size_vec,
                        const crackitos_core::commons::fp half_size_length)
         {
-            half_size_vec_ = half_size_vec;
-            min_bound_ = Vec2f(centre - half_size_vec_);
-            max_bound_ = Vec2f(centre + half_size_vec_);
+            half_size_vec_ = {std::abs(half_size_vec.x), std::abs(half_size_vec.y)};
+            min_bound_ = centre - half_size_vec_;
+            max_bound_ = centre + half_size_vec_;
             centre_ = centre;
             half_size_length_ = half_size_length;;
         }
@@ -62,36 +62,43 @@ namespace crackitos_core::math
         [[nodiscard]] constexpr Vec2f min_bound() const { return min_bound_; }
         [[nodiscard]] constexpr Vec2f max_bound() const { return max_bound_; }
         [[nodiscard]] constexpr crackitos_core::commons::fp half_size_length() const { return half_size_length_; }
-        [[nodiscard]] constexpr Vec2f half_size_vec() const { return half_size_vec_; }
+        //TODO maybe delete half_size_vec member (& length), and just use these functions
+        [[nodiscard]] constexpr Vec2f half_size_vec() const { return (max_bound_ - min_bound_) * 0.5f; }
 
         void set_min_bound(const Vec2f bound)
         {
             min_bound_ = bound;
             centre_ = (min_bound_ + max_bound_) * 0.5f;
-            half_size_vec_ = max_bound_ - centre_;
-            half_size_length_ = (max_bound_ - centre_).Magnitude();
+            half_size_vec_ = (max_bound_ - min_bound_) * 0.5f;
+            half_size_length_ = half_size_vec_.Magnitude();
         }
 
         void set_max_bound(const Vec2f bound)
         {
             max_bound_ = bound;
             centre_ = (min_bound_ + max_bound_) * 0.5f;
-            half_size_vec_ = max_bound_ - centre_;
-            half_size_length_ = (max_bound_ - centre_).Magnitude();
+            half_size_vec_ = (max_bound_ - min_bound_) * 0.5f;
+            half_size_length_ = half_size_vec_.Magnitude();
         }
 
         [[nodiscard]] constexpr bool Contains(const Vec2f point) const
         {
-            if (point.x < min_bound_.x) return false;
-            if (point.x > max_bound_.x) return false;
-            if (point.y < min_bound_.y) return false;
-            if (point.y > max_bound_.y) return false;
-            return true;
+            return (point.x >= min_bound_.x && point.x <= max_bound_.x &&
+                point.y >= min_bound_.y && point.y <= max_bound_.y);
         }
 
         [[nodiscard]] AABB GetBoundingBox() const
         {
+          //TODO add margin?
             return *this;
+        }
+
+        [[nodiscard]] Vec2f ClosestPoint(const Vec2f& point) const
+        {
+            return {
+                std::clamp(point.x, min_bound_.x, max_bound_.x),
+                std::clamp(point.y, min_bound_.y, max_bound_.y)
+            };
         }
 
         [[nodiscard]] Vec2f GetCentre() const { return (min_bound_ + max_bound_) * 0.5f; }
@@ -100,8 +107,8 @@ namespace crackitos_core::math
         void UpdatePosition(const Vec2f position)
         {
             centre_ = position;
-            min_bound_ = Vec2f(centre_ - half_size_vec_);
-            max_bound_ = Vec2f(centre_ + half_size_vec_);
+            min_bound_ = centre_ - half_size_vec_;
+            max_bound_ = centre_ + half_size_vec_;
         }
 
         bool operator==(const AABB& other) const
@@ -139,6 +146,7 @@ namespace crackitos_core::math
 
         [[nodiscard]] AABB GetBoundingBox() const
         {
+          //TODO add margin?
             const Vec2f min = centre_ - Vec2f(radius_, radius_);
             const Vec2f max = centre_ + Vec2f(radius_, radius_);
             const AABB box(min, max);
@@ -203,17 +211,18 @@ namespace crackitos_core::math
         }
     };
 
-    //Find the point of a segment that is closest to a specified point
+     //Find the point of a segment that is closest to a specified point
     constexpr Vec2f ClosestPointOnSegment(const Vec2f segment_start, const Vec2f segment_end, const Vec2f compare_point)
     {
         const Vec2f segment = segment_end - segment_start;
         const Vec2f point_to_start = compare_point - segment_start;
         const crackitos_core::commons::fp t = std::clamp(point_to_start.Dot(segment) / segment.SquareMagnitude(),
-                                                         0.0f, 1.0f);
+                                         0.0f, 1.0f);
         const Vec2f closest_point = segment_start + segment * t;
 
         return closest_point;
     }
+
 
     //Intersections between shapes
     [[nodiscard]] constexpr bool Intersect(const AABB& aabb_a, const AABB& aabb_b)
