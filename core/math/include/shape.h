@@ -57,6 +57,15 @@ namespace crackitos_core::math
             half_size_length_ = half_size_length;;
         }
 
+        constexpr AABB(const Vec2f centre, const commons::fp width, const commons::fp height)
+        {
+            half_size_vec_ = {width/2.0f, height/2.0f};
+            min_bound_ = centre - half_size_vec_;
+            max_bound_ = centre + half_size_vec_;
+            centre_ = centre;
+            half_size_length_ = half_size_vec().Magnitude();
+        }
+
         AABB() = default;
 
         [[nodiscard]] constexpr Vec2f min_bound() const { return min_bound_; }
