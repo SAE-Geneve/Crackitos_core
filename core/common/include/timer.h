@@ -22,6 +22,11 @@ namespace crackitos_core::timer
         void SetFixedDeltaTime(commons::fp seconds) noexcept;
         bool FixedDeltaTimeStep() noexcept;
         [[nodiscard]] commons::fp FixedDeltaTime() const noexcept;
+        void AddTime(commons::fp delta) noexcept
+        {
+            accumulated_time_ += std::chrono::duration<commons::fp>(delta);
+        }
+
 
     private:
         std::chrono::high_resolution_clock::time_point start_time_;
