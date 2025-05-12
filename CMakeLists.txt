@@ -16,7 +16,7 @@ endif ()
 # === sixit: header-only interface library ===
 add_library(sixit INTERFACE)
 target_include_directories(sixit INTERFACE
-        ${CMAKE_CURRENT_SOURCE_DIR}/externals/sixit
+        ${CMAKE_CURRENT_SOURCE_DIR}/externals
 )
 
 # === crackitos_core static library ===

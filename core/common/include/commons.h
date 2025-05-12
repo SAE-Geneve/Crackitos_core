@@ -1,6 +1,6 @@
 #ifndef CRACKITOS_PHYSICS_COMMON_COMMONS_H_
 #define CRACKITOS_PHYSICS_COMMON_COMMONS_H_
-#include "dmath/gamefloat/ieee_float_inline_asm.h"
+#include "sixit/dmath/gamefloat/ieee_float_inline_asm.h"
 
 namespace crackitos_core::commons
 {
